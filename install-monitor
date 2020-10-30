@@ -1,0 +1,68 @@
+#!/bin/bash
+
+URL_FILE="https://raw.githubusercontent.com/00F100/ubuntu-monitor-resolution-vbox/main/$1/$2/monitor"
+
+function check_file {
+    echo "Try find this configuration version"
+    if curl --output /dev/null --silent --head --fail "$URL_FILE"; then
+        echo "Success on find this configuration version"
+    else
+        echo "ERROR: Manufacturer or Model configuration not found or network fails!"
+        echo ""
+        exit
+    fi
+}
+
+function download_file {
+    echo "Try download this configuration version"
+    if sudo curl --silent -L "$URL_FILE" -o /usr/local/bin/monitor; then
+        echo "Success on download this configuration version"
+    else
+        echo "ERROR: Manufacturer or Model configuration not found or network fails!"
+        echo ""
+        exit
+    fi
+}
+
+function active_file {
+    echo "Try active this configuration version"
+    sudo chmod +x /usr/local/bin/monitor \
+    && echo "bash /usr/local/bin/monitor" >> ~/.profile \
+    && echo "Success active this configuration version"
+}
+
+function show_start {
+    echo "Manufacturer: $1"
+    echo ""
+    echo "Model: $2"
+    echo ""
+    check_file $1 $2
+    download_file $1 $2
+    active_file
+}
+
+function show_help {
+    echo " Usage"
+    echo ""
+    echo "    install-monitor [Manufacturer] [Model]"
+    echo ""
+    echo "    eg: install-monitor dell g3"
+    echo ""
+    exit
+}
+
+echo ""
+echo "#############################"
+echo "Ubuntu Monitor Install"
+echo "#############################"
+echo ""
+
+if [ "$1" == "help" ]; then
+    show_help
+else
+    if [ -z "$1" ]; then
+        show_help
+    else
+        show_start $1 $2
+    fi
+fi
